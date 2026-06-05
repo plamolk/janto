@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>คู่มือการใช้งาน - Janto Optical Clinic</title>
+  <link rel="stylesheet" href="style/output.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    
+    <!-- Header -->
+    <header class="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800">คู่มือการใช้งานและวิธีแก้ปัญหา</h1>
+        <p class="text-slate-500 mt-2">Janto Optical Clinic System</p>
+      </div>
+      <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg shadow-sm transition-colors">
+        <span>⬅️</span> กลับไปหน้าหลัก
+      </a>
+    </header>
+
+    <main class="space-y-10">
+      
+      <!-- Section 1: Basic Usage -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <span>💡</span> การใช้งานเบื้องต้น
+        </h2>
+        <div class="prose prose-slate max-w-none text-slate-600">
+          <p>
+            ระบบนี้ออกแบบมาให้ใช้งานง่ายและปลอดภัย ข้อมูลทุกอย่างที่คุณบันทึกจะถูก <strong>บันทึกอัตโนมัติ (Auto-Save)</strong> ลงในเครื่องคอมพิวเตอร์ของคุณทันที และจะ <strong>สำรองข้อมูลขึ้น Google Drive อัตโนมัติ (Auto-Backup)</strong> เมื่อมีการเชื่อมต่ออินเทอร์เน็ต
+          </p>
+          <p class="mt-2">
+            คุณไม่จำเป็นต้องกดปุ่มสำรองข้อมูลใดๆ ด้วยตัวเอง ระบบจัดการให้คุณทั้งหมด!
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 2: Troubleshooting -->
+      <section>
+        <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <span>🛠️</span> การแจ้งเตือนและวิธีแก้ไข
+        </h2>
+        
+        <div class="space-y-4">
+          
+          <!-- Error 1 -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <h3 class="text-lg font-semibold text-amber-800 mb-2">1. ⚠️ ไม่มีอินเทอร์เน็ต (No Internet)</h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1">
+              <li><span class="font-medium">สาเหตุ:</span> คอมพิวเตอร์ไม่ได้เชื่อมต่อเน็ต ข้อมูลจะบันทึกแค่ในเครื่อง ยังไม่ขึ้น Cloud</li>
+              <li><span class="font-medium">วิธีแก้:</span> เช็คสาย LAN หรือ Wi-Fi ของร้าน เมื่อเน็ตกลับมา แถบเตือนจะหายไปเอง</li>
+            </ul>
+          </div>
+
+          <!-- Error 2 -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+            <h3 class="text-lg font-semibold text-red-800 mb-2">2. ⛔ เวลาเครื่องไม่ตรง (Time Desync / Read-Only Mode)</h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1">
+              <li><span class="font-medium">สาเหตุ:</span> นาฬิกาคอมพิวเตอร์เดินไม่ตรงกับเวลามาตรฐานสากล ระบบจะล็อคการบันทึกเพื่อป้องกันข้อมูลรวน</li>
+              <li><span class="font-medium">วิธีแก้:</span> ไปที่ตั้งค่า (Settings) ของ Windows/Mac &rarr; Date & Time &rarr; เปิด "Set time automatically" (ตั้งเวลาอัตโนมัติ) แล้วกด F5 รีเฟรชหน้าเว็บ</li>
+            </ul>
+          </div>
+
+          <!-- Error 3 -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+            <h3 class="text-lg font-semibold text-red-800 mb-2">3. ⛔ ไม่พบไฟล์ token.json / Google API Error</h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1">
+              <li><span class="font-medium">สาเหตุ:</span> ระบบสูญเสียกุญแจเชื่อมต่อ Google Drive</li>
+              <li><span class="font-medium">วิธีแก้:</span> 🛠️ กรุณาติดต่อฝ่ายไอที (โทร: <strong class="text-red-600 text-lg">0936108294</strong>)</li>
+            </ul>
+          </div>
+
+          <!-- Error 4 -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+            <h3 class="text-lg font-semibold text-red-800 mb-2">4. ⛔ ฐานข้อมูลเสียหาย (Database Corrupt)</h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1">
+              <li><span class="font-medium">สาเหตุ:</span> ไฟล์เก็บข้อมูลเกิดความเสียหาย (อาจเกิดจากไฟตกตอนกำลังเซฟ)</li>
+              <li><span class="font-medium">วิธีแก้:</span> 🛑 ห้ามใช้งานต่อเด็ดขาด! 🛠️ กรุณาติดต่อฝ่ายไอที (โทร: <strong class="text-red-600 text-lg">0936108294</strong>) ทันที</li>
+            </ul>
+          </div>
+
+          <!-- Error 5 -->
+          <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+            <h3 class="text-lg font-semibold text-red-800 mb-2">5. ⛔ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (Backend Offline)</h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1">
+              <li><span class="font-medium">สาเหตุ:</span> โปรแกรมหลังบ้านปิดตัวลง</li>
+              <li><span class="font-medium">วิธีแก้:</span> ลองรีสตาร์ทโปรแกรม 1 ครั้ง หากไม่หาย 🛠️ กรุณาติดต่อฝ่ายไอที (โทร: <strong class="text-red-600 text-lg">0936108294</strong>)</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบจัดการร้านแว่นตา</title>
+  <link rel="stylesheet" href="style/output.css">
+</head>
+<body class="bg-slate-100 min-h-screen">
+  <!-- ─── Mission B: Global Alert Banner ──────────────────────────── -->
+  <div
+    id="global-alert-banner"
+    style="display: none; width: 100%; padding: 12px 16px; text-align: center; font-weight: 600; z-index: 9999; position: fixed; top: 0; left: 0; font-size: 14px; letter-spacing: 0.02em; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.3s ease;"
+  ></div>
+  <div id="appContainer" class="print:hidden">
+    <div class="flex min-h-screen">
+<aside class="w-64 bg-slate-800 text-white flex flex-col shrink-0">
+      <div class="px-6 py-5 border-b border-slate-700">
+        <h1 class="text-xl font-semibold tracking-tight">ระบบจัดการร้านแว่นตา</h1>
+        <p class="text-slate-400 text-sm mt-1">ระบบจัดการภายใน</p>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        <a
+          href="index.html"
+          id="navCustomers"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-700 text-white font-medium transition-colors"
+        >
+          <span aria-hidden="true">👥</span>
+          ระบบลูกค้า
+        </a>
+        <a
+          href="billing.html"
+          id="navBilling"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+        >
+          <span aria-hidden="true">🧾</span>
+          ระบบบิลลิ่ง
+        </a>
+      </nav>
+      <div class="px-3 py-4 mt-auto">
+        <a
+          href="manual.html"
+          target="_blank"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+        >
+          <span aria-hidden="true">📖</span>
+          คู่มือการใช้งาน
+        </a>
+      </div>
+    </aside>
+
+      <main class="flex-1 overflow-auto">
+<div id="customersView" class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-800">รายชื่อลูกค้าทั้งหมด</h2>
+            <p class="text-slate-500 text-sm mt-1">จัดการข้อมูลลูกค้าร้านแว่นตา</p>
+          </div>
+          <button
+            id="addCustomerBtn"
+            type="button"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+             เพิ่มลูกค้าใหม่
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-6">
+          <label for="searchInput" class="sr-only">ค้นหาลูกค้า</label>
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="ค้นหาชื่อ หรือ เบอร์โทรศัพท์..."
+              class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+            />
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-3 font-semibold text-slate-600">รหัส</th>
+                  <th class="px-6 py-3 font-semibold text-slate-600">ชื่อ</th>
+                  <th class="px-6 py-3 font-semibold text-slate-600">นามสกุล</th>
+                  <th class="px-6 py-3 font-semibold text-slate-600">เบอร์โทร</th>
+                  <th class="px-6 py-3 font-semibold text-slate-600 text-right">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="customerTableBody" class="divide-y divide-slate-100">
+                <!-- Rows injected by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      </main>
+
+<div id="customerModal" class="hidden fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[92vh] overflow-y-auto p-6">
+      <h3 class="text-2xl font-bold text-slate-800 mb-5">เพิ่มลูกค้าใหม่</h3>
+      <form id="customerForm" class="grid grid-cols-2 gap-4">
+
+        <!-- Row 0: วันที่บันทึก -->
+        <div class="col-span-2">
+          <label for="customer-date" class="block text-base font-medium text-gray-700 mb-1">วันที่บันทึก/วันที่สมัคร <span class="text-red-500">*</span></label>
+          <input id="customer-date" name="created_at" type="date" required
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- Row 1: ชื่อ / นามสกุล -->
+        <div>
+          <label for="first_name" class="block text-base font-medium text-gray-700 mb-1">ชื่อ <span class="text-red-500">*</span></label>
+          <input id="first_name" name="first_name" type="text" required
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label for="last_name" class="block text-base font-medium text-gray-700 mb-1">นามสกุล</label>
+          <input id="last_name" name="last_name" type="text"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- Row 2: เบอร์มือถือ / วันเกิด -->
+        <div>
+          <label for="tel_mobile" class="block text-base font-medium text-gray-700 mb-1">เบอร์มือถือ</label>
+          <input id="tel_mobile" name="tel_mobile" type="text"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label for="birthdate" class="block text-base font-medium text-gray-700 mb-1">วันเกิด</label>
+          <input id="birthdate" name="birthdate" type="date"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- Row 3: เพศ / อาชีพ -->
+        <div>
+          <label for="gender" class="block text-base font-medium text-gray-700 mb-1">เพศ</label>
+          <select id="gender" name="gender"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">— ไม่ระบุ —</option>
+            <option value="ชาย">ชาย</option>
+            <option value="หญิง">หญิง</option>
+            <option value="ไม่ระบุ">ไม่ระบุ</option>
+          </select>
+        </div>
+        <div>
+          <label for="occupation" class="block text-base font-medium text-gray-700 mb-1">อาชีพ</label>
+          <input id="occupation" name="occupation" type="text"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- อีเมล -->
+        <div class="col-span-2">
+          <label for="email" class="block text-base font-medium text-gray-700 mb-1">อีเมล</label>
+          <input id="email" name="email" type="email"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- ที่อยู่ (full width) -->
+        <div class="col-span-2">
+          <label for="address" class="block text-base font-medium text-gray-700 mb-1">ที่อยู่</label>
+          <input id="address" name="address" type="text"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- ประวัติสุขภาพ -->
+        <div class="col-span-2">
+          <label for="health_history" class="block text-base font-medium text-gray-700 mb-1">ประวัติสุขภาพ</label>
+          <textarea id="health_history" name="health_history" rows="2"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
+
+        <!-- ปัญหาสายตาปัจจุบันที่พบ -->
+        <div class="col-span-2">
+          <label for="current_eye_problem" class="block text-base font-medium text-gray-700 mb-1">ปัญหาสายตาปัจจุบันที่พบ</label>
+          <textarea id="current_eye_problem" name="current_eye_problem" rows="2"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
+
+        <!-- จุดประสงค์หลัก -->
+        <div>
+          <label for="purpose" class="block text-base font-medium text-gray-700 mb-1">จุดประสงค์หลัก</label>
+          <select id="purpose" name="purpose"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">— เลือก —</option>
+            <option value="ขับรถ">ขับรถ</option>
+            <option value="เล่นกีฬา">เล่นกีฬา</option>
+            <option value="อ่านหนังสือ">อ่านหนังสือ</option>
+            <option value="ทั่วไป">ทั่วไป</option>
+            <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="flex flex-col justify-end">
+          <input type="text" id="purpose_other" name="purpose_other"
+            placeholder="โปรดระบุจุดประสงค์..."
+            class="hidden w-full px-3 py-2.5 border border-blue-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <!-- ประสบการณ์เลนส์ -->
+        <div class="col-span-2">
+          <label for="progressive_experience" class="block text-base font-medium text-gray-700 mb-1">ประสบการณ์เลนส์</label>
+          <select id="progressive_experience" name="progressive_experience"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">— เลือก —</option>
+            <option value="ไม่เคยใช้ progressive">ไม่เคยใช้ progressive</option>
+            <option value="เคยใช้">เคยใช้</option>
+            <option value="เคยใช้แต่มีปัญหา">เคยใช้แต่มีปัญหา</option>
+            <option value="เคยใส่คอนแทคเลนส์">เคยใส่คอนแทคเลนส์</option>
+            <option value="ไม่เคยใส่แว่น">ไม่เคยใส่แว่น</option>
+          </select>
+        </div>
+
+        <!-- ประสบการณ์ใส่แว่น (Radio) -->
+        <div class="col-span-2">
+          <p class="block text-base font-medium text-gray-700 mb-2">ประสบการณ์ใส่แว่น</p>
+          <div class="flex gap-6">
+            <label class="inline-flex items-center gap-2 text-base text-slate-700 cursor-pointer">
+              <input type="radio" name="glasses_experience" value="ยังไม่เคยใส่แว่น" checked
+                class="accent-blue-600" />
+              ยังไม่เคยใส่แว่น
+            </label>
+            <label class="inline-flex items-center gap-2 text-base text-slate-700 cursor-pointer">
+              <input type="radio" name="glasses_experience" value="เคยใส่มาแล้ว"
+                class="accent-blue-600" />
+              เคยใส่มาแล้ว
+            </label>
+          </div>
+        </div>
+
+        <!-- Old Prescription Table (hidden until เคยใส่มาแล้ว) -->
+        <div id="oldPrescriptionSection" class="hidden col-span-2">
+          <p class="text-base font-medium text-gray-700 mb-2">ค่าสายตาเดิม (Old Prescription)</p>
+          <div class="border border-slate-200 rounded-lg overflow-hidden">
+            <table class="w-full text-base text-center">
+              <thead class="bg-slate-50">
+                <tr class="text-slate-500">
+                  <th class="py-2 px-2 text-left w-8">RX</th>
+                  <th class="py-2 px-1">SPH</th>
+                  <th class="py-2 px-1">CYL</th>
+                  <th class="py-2 px-1">AXIS</th>
+                  <th class="py-2 px-1">ADD</th>
+                  <th class="py-2 px-1">PD</th>
+                  <th class="py-2 px-1">H</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-slate-100">
+                  <td class="py-2 px-2 font-semibold text-slate-600 text-left">R</td>
+                  <td class="p-1"><input id="old_r_sph" name="old_r_sph" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_r_cyl" name="old_r_cyl" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_r_axis" name="old_r_axis" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_r_add" name="old_r_add" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_r_pd" name="old_r_pd" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_r_h" name="old_r_h" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+                <tr class="border-t border-slate-100">
+                  <td class="py-2 px-2 font-semibold text-slate-600 text-left">L</td>
+                  <td class="p-1"><input id="old_l_sph" name="old_l_sph" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_l_cyl" name="old_l_cyl" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_l_axis" name="old_l_axis" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_l_add" name="old_l_add" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_l_pd" name="old_l_pd" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-1"><input id="old_l_h" name="old_l_h" type="text" class="w-full px-2 py-1.5 border border-slate-200 rounded text-center text-base focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- รายละเอียดอื่นๆ -->
+        <div class="col-span-2">
+          <label for="other_details" class="block text-base font-medium text-gray-700 mb-1">รายละเอียดอื่นๆ</label>
+          <textarea id="other_details" name="other_details" rows="2"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="col-span-2 flex justify-end gap-3 pt-2 border-t border-slate-100">
+          <button id="cancelCustomerBtn" type="button"
+            class="px-4 py-2.5 text-base font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+            ยกเลิก
+          </button>
+          <button type="submit"
+            class="px-4 py-2.5 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<div id="customerDetailModal" class="hidden fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-2xl font-bold text-slate-800">รายละเอียดลูกค้า</h3>
+        <button
+          id="closeDetailModalBtn"
+          type="button"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          aria-label="ปิด"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-5">
+        <!-- Section 1: Customer Info -->
+        <p class="text-sm text-slate-500 mb-4 bg-amber-50 border border-amber-100 px-3 py-2 rounded-lg">
+          ดับเบิลคลิกที่ช่องข้อมูลแต่ละช่องเพื่อแก้ไข (Double-click to edit)
+        </p>
+        <h4 class="text-xl font-semibold text-slate-800 mb-3">ข้อมูลลูกค้า</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">วันที่บันทึก</label>
+            <span id="detailCreatedAt" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="created_at" data-type="date">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ชื่อ</label>
+            <span id="detailFirstName" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="first_name">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">นามสกุล</label>
+            <span id="detailLastName" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="last_name">—</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-3 mb-8 text-base">
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">เบอร์มือถือ</label>
+            <span id="detailPhone" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="tel_mobile">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">วันเกิด</label>
+            <span id="detailBirthdate" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="birthdate">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">เพศ</label>
+            <span id="detailGender" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="gender" data-type="select" data-options="ชาย,หญิง,ไม่ระบุ">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">อาชีพ</label>
+            <span id="detailOccupation" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="occupation">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">อีเมล</label>
+            <span id="detailEmail" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="email">—</span>
+          </div>
+          <div class="col-span-2 flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ที่อยู่</label>
+            <span id="detailAddress" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="address">—</span>
+          </div>
+          <div class="col-span-2 flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ประวัติสุขภาพ</label>
+            <span id="detailHealthHistory" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="health_history">—</span>
+          </div>
+          <div class="col-span-2 flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ปัญหาสายตาปัจจุบันที่พบ</label>
+            <span id="detailProblem" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="current_eye_problem">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">จุดประสงค์หลัก</label>
+            <span id="detailPurpose" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="purpose" data-type="select" data-options="ขับรถ,เล่นกีฬา,อ่านหนังสือ,ทั่วไป,คอมพิวเตอร์,อื่นๆ">—</span>
+          </div>
+          <div class="flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ประสบการณ์เลนส์</label>
+            <span id="detailProgressiveExp" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="progressive_experience" data-type="select" data-options="ไม่เคยใช้ progressive,เคยใช้,เคยใช้แต่มีปัญหา,เคยใส่คอนแทคเลนส์,ไม่เคยใส่แว่น">—</span>
+          </div>
+          <div class="col-span-2 flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">ประสบการณ์ใส่แว่น</label>
+            <span id="detailGlassesExp" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="glasses_experience" data-type="select" data-options="ยังไม่เคยใส่แว่น,เคยใส่มาแล้ว">—</span>
+          </div>
+          <!-- Old Rx display (shown only when data exists) -->
+          <div id="detailOldRxSection" class="col-span-2 hidden">
+            <p class="text-slate-500 mb-1">ค่าสายตาเดิม</p>
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <table class="w-full text-base text-center">
+                <thead class="bg-slate-50">
+                  <tr class="text-slate-500">
+                    <th class="py-2 px-2 text-left w-8 text-base">RX</th>
+                    <th class="py-2 px-1">SPH</th>
+                    <th class="py-2 px-1">CYL</th>
+                    <th class="py-2 px-1">AXIS</th>
+                    <th class="py-2 px-1">ADD</th>
+                    <th class="py-2 px-1">PD</th>
+                    <th class="py-2 px-1">H</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-slate-100">
+                    <td class="py-2 px-2 font-semibold text-slate-600 text-left">R</td>
+                    <td id="dOldRSph" class="py-2 px-1">—</td>
+                    <td id="dOldRCyl" class="py-2 px-1">—</td>
+                    <td id="dOldRAxis" class="py-2 px-1">—</td>
+                    <td id="dOldRAdd" class="py-2 px-1">—</td>
+                    <td id="dOldRPd" class="py-2 px-1">—</td>
+                    <td id="dOldRH" class="py-2 px-1">—</td>
+                  </tr>
+                  <tr class="border-t border-slate-100">
+                    <td class="py-2 px-2 font-semibold text-slate-600 text-left">L</td>
+                    <td id="dOldLSph" class="py-2 px-1">—</td>
+                    <td id="dOldLCyl" class="py-2 px-1">—</td>
+                    <td id="dOldLAxis" class="py-2 px-1">—</td>
+                    <td id="dOldLAdd" class="py-2 px-1">—</td>
+                    <td id="dOldLPd" class="py-2 px-1">—</td>
+                    <td id="dOldLH" class="py-2 px-1">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-span-2 flex flex-col min-w-0">
+            <label class="text-base font-medium text-gray-700 mb-1">รายละเอียดอื่นๆ</label>
+            <span id="detailOtherDetails" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="other_details">—</span>
+          </div>
+        </div>
+
+        <!-- Section 2: Visit History -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xl font-semibold text-slate-800">ประวัติการมาร้าน</h4>
+            <button
+              id="addNewVisitBtn"
+              type="button"
+              class="inline-flex items-center gap-2 px-3 py-2 text-base font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+               เพิ่มประวัติวัดสายตา
+            </button>
+          </div>
+          <div class="border border-slate-200 rounded-lg overflow-hidden">
+            <table class="w-full text-base text-left">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3 font-semibold text-slate-600">ครั้งที่</th>
+                  <th class="px-4 py-3 font-semibold text-slate-600">วันที่</th>
+                  <th class="px-4 py-3 font-semibold text-slate-600">ชนิดเลนส์</th>
+                  <th class="px-4 py-3 font-semibold text-slate-600">ผู้ตรวจ</th>
+                  <th class="px-4 py-3 font-semibold text-slate-600">พนักงานขาย</th>
+                  <th class="px-4 py-3 font-semibold text-slate-600 text-right">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="visitTableBody" class="divide-y divide-slate-100">
+                <!-- Rows injected by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+        <button
+          id="closeDetailFooterBtn"
+          type="button"
+          class="px-4 py-2.5 text-base font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          ปิด
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+<div id="visitModal" class="hidden fixed inset-0 bg-gray-600/50 flex items-center justify-center z-[60] p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto p-6">
+      <h3 id="visitModalTitle" class="text-2xl font-bold text-slate-800 mb-4">เพิ่มประวัติวัดสายตา</h3>
+      <form id="visitForm" class="space-y-5">
+        <input type="hidden" id="visitId" name="visitId" />
+        <!-- Top Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label for="visit-date" class="block text-base font-medium text-gray-700 mb-1">วันที่เข้ารับบริการ</label>
+            <input id="visit-date" name="visit_date" type="date" required class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="examiner" class="block text-base font-medium text-gray-700 mb-1">ผู้ตรวจสายตา</label>
+            <input id="examiner" name="examiner" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="salesperson" class="block text-base font-medium text-gray-700 mb-1">พนักงานขาย</label>
+            <input id="salesperson" name="salesperson" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="dispenser" class="block text-base font-medium text-gray-700 mb-1">ผู้ประกอบแว่น</label>
+            <input id="dispenser" name="dispenser" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+
+        <!-- V.A. Section -->
+        <div>
+          <p class="text-base font-medium text-gray-700 mb-2">สายตา (V.A.)</p>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label for="va_empty_r" class="block text-base font-medium text-gray-700 mb-1">ตาขวา (R)</label>
+              <input id="va_empty_r" name="va_empty_r" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="va_empty_l" class="block text-base font-medium text-gray-700 mb-1">ตาซ้าย (L)</label>
+              <input id="va_empty_l" name="va_empty_l" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="va_empty_total" class="block text-base font-medium text-gray-700 mb-1">รวม</label>
+              <input id="va_empty_total" name="va_empty_total" type="text" class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescription Grids -->
+        <p class="text-base font-semibold text-slate-700 mt-4">การวัดค่าสายตา</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Objective -->
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
+            <p class="text-base font-semibold text-slate-700 mb-2">Objective (วัดด้วยเครื่อง)</p>
+            <table class="w-full text-base">
+              <thead>
+                <tr class="text-slate-500">
+                  <th class="py-1 pr-1 text-left w-8"></th>
+                  <th class="py-1 px-0.5">SPH</th>
+                  <th class="py-1 px-0.5">CYL</th>
+                  <th class="py-1 px-0.5">AXIS</th>
+                  <th class="py-1 px-0.5">ADD</th>
+                  <th class="py-1 px-0.5">PD</th>
+                  <th class="py-1 px-0.5">H</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-1 pr-1 font-medium text-slate-600">R</td>
+                  <td class="p-0.5"><input name="rx_obj_r_sph" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_r_cyl" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_r_axis" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_r_add" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_r_pd" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_r_h" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+                <tr>
+                  <td class="py-1 pr-1 font-medium text-slate-600">L</td>
+                  <td class="p-0.5"><input name="rx_obj_l_sph" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_l_cyl" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_l_axis" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_l_add" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_l_pd" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_obj_l_h" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Subjective -->
+          <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
+            <p class="text-base font-semibold text-slate-700 mb-2">Subjective (ลองเลนส์จริง)</p>
+            <table class="w-full text-base">
+              <thead>
+                <tr class="text-slate-500">
+                  <th class="py-1 pr-1 text-left w-8"></th>
+                  <th class="py-1 px-0.5">SPH</th>
+                  <th class="py-1 px-0.5">CYL</th>
+                  <th class="py-1 px-0.5">AXIS</th>
+                  <th class="py-1 px-0.5">ADD</th>
+                  <th class="py-1 px-0.5">PD</th>
+                  <th class="py-1 px-0.5">H</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-1 pr-1 font-medium text-slate-600">R</td>
+                  <td class="p-0.5"><input name="rx_subj_r_sph" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_r_cyl" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_r_axis" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_r_add" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_r_pd" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_r_h" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+                <tr>
+                  <td class="py-1 pr-1 font-medium text-slate-600">L</td>
+                  <td class="p-0.5"><input name="rx_subj_l_sph" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_l_cyl" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_l_axis" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_l_add" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_l_pd" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                  <td class="p-0.5"><input name="rx_subj_l_h" type="text" class="w-full px-2 py-1.5 text-base border border-slate-200 rounded text-center focus:ring-1 focus:ring-blue-500 focus:outline-none" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bottom Section: เลนส์ / กรอบ -->
+        <div class="space-y-4 border-t border-slate-200 pt-4">
+          <div>
+            <label for="prescription_type" class="block text-base font-medium text-gray-700 mb-1">ประเภทการมอง</label>
+            <select id="prescription_type" name="prescription_type" class="w-full max-w-md px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">— เลือก —</option>
+              <option value="Distance">สายตาไกล</option>
+              <option value="Reading">สายตาอ่านหนังสือ</option>
+              <option value="Progressive">เลนส์โปรเกรสซีฟ</option>
+              <option value="Bifocal">สองชั้น</option>
+              <option value="Other">อื่นๆ</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="recommended_lens" class="block text-base font-medium text-gray-700 mb-1">เลนส์ที่แนะนำให้ใช้</label>
+            <input id="recommended_lens" name="recommended_lens" type="text"
+              class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="lens_type" class="block text-base font-medium text-gray-700 mb-1">ชนิดเลนส์</label>
+              <input id="lens_type" name="lens_type" type="text"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="lens_color" class="block text-base font-medium text-gray-700 mb-1">สีเลนส์</label>
+              <input id="lens_color" name="lens_color" type="text"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="lens_price" class="block text-base font-medium text-gray-700 mb-1">ราคา (สำหรับเลนส์)</label>
+              <input id="lens_price" name="lens_price" type="number" step="0.01" min="0"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="glasses_type" class="block text-base font-medium text-gray-700 mb-1">กรอบแว่น</label>
+              <input id="glasses_type" name="glasses_type" type="text"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="frame_model" class="block text-base font-medium text-gray-700 mb-1">โมเดล</label>
+              <input id="frame_model" name="frame_model" type="text"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="frame_price" class="block text-base font-medium text-gray-700 mb-1">ราคา (สำหรับกรอบแว่น)</label>
+              <input id="frame_price" name="frame_price" type="number" step="0.01" min="0"
+                class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div>
+            <label for="notes" class="block text-base font-medium text-gray-700 mb-1">หมายเหตุ</label>
+            <textarea id="notes" name="notes" rows="2"
+              class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-3 pt-2 border-t border-slate-200">
+          <button id="cancelVisitBtn" type="button" class="px-4 py-2.5 text-base font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+            ยกเลิก
+          </button>
+          <button id="saveVisitBtn" type="submit" class="px-4 py-2.5 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+            บันทึกประวัติ
+          </button>
+        </div>
+      </form>
+    </div>
+    </div>
+  </div>
+  <script src="utils.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

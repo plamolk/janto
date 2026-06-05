@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบจัดการร้านแว่นตา — บิลลิ่ง</title>
+  <link rel="stylesheet" href="style/output.css">
+</head>
+<body class="bg-slate-100 min-h-screen">
+  <!-- ─── Mission B: Global Alert Banner ──────────────────────────── -->
+  <div
+    id="global-alert-banner"
+    style="display: none; width: 100%; padding: 12px 16px; text-align: center; font-weight: 600; z-index: 9999; position: fixed; top: 0; left: 0; font-size: 14px; letter-spacing: 0.02em; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.3s ease;"
+  ></div>
+  <div id="appContainer" class="print:hidden">
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-slate-800 text-white flex flex-col shrink-0">
+        <div class="px-6 py-5 border-b border-slate-700">
+          <h1 class="text-xl font-semibold tracking-tight">ระบบจัดการร้านแว่นตา</h1>
+          <p class="text-slate-400 text-sm mt-1">ระบบจัดการภายใน</p>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-1">
+          <a
+            href="index.html"
+            id="navCustomers"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+          >
+            <span aria-hidden="true">👥</span>
+            ระบบลูกค้า
+          </a>
+          <a
+            href="billing.html"
+            id="navBilling"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-700 text-white font-medium transition-colors"
+          >
+            <span aria-hidden="true">🧾</span>
+            ระบบบิลลิ่ง
+          </a>
+        </nav>
+      </aside>
+
+      <main class="flex-1 overflow-auto">
+        <div class="max-w-6xl mx-auto px-6 py-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-slate-800">รายการใบเสนอราคา / ใบกำกับภาษี</h2>
+              <p class="text-slate-500 text-sm mt-1">จัดการใบเสนอราคาและใบกำกับภาษี</p>
+            </div>
+            <button
+              type="button"
+              id="createBillBtn"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+               สร้างเอกสารใหม่
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div class="md:col-span-2">
+              <label class="block text-xs text-gray-500 mb-1">ค้นหา (ชื่อลูกค้า หรือ เลขที่เอกสาร)</label>
+              <input type="text" id="filterBillingText" oninput="filterBillingDocuments()" placeholder="พิมพ์ชื่อลูกค้า หรือ INV..." class="w-full px-3 py-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">วันที่เอกสาร</label>
+              <input type="date" id="filterBillingDate" onchange="filterBillingDocuments()" class="w-full px-3 py-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">ประเภทเอกสาร</label>
+              <select id="filterBillingType" onchange="filterBillingDocuments()" class="w-full px-3 py-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                <option value="all">ทั้งหมด</option>
+                <option value="1">ใบเสนอราคา</option>
+                <option value="2">ใบกำกับภาษี</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="px-6 py-3 font-semibold text-slate-600 w-16">ลำดับ</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600">เลขที่เอกสาร</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600">ประเภท</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600">ชื่อลูกค้า</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600 text-right">ยอดรวม</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600">วันที่</th>
+                    <th class="px-6 py-3 font-semibold text-slate-600 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="billingTableBody" class="divide-y divide-slate-100">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="billingModal" class="hidden fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="billingModalTitle" class="text-xl font-semibold text-slate-800">สร้างเอกสารใหม่</h3>
+        <button
+          type="button"
+          onclick="closeBillingModal()"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          aria-label="ปิด"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="billingForm" class="px-6 py-5">
+        <input type="hidden" id="billingEditId" value="" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label for="billingDocumentType" class="block text-sm font-medium text-slate-700 mb-1">ประเภทเอกสาร</label>
+            <select
+              id="billingDocumentType"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="1">ใบเสนอราคา / QUOTATION</option>
+              <option value="2">ใบกำกับภาษี / TAX INVOICE</option>
+            </select>
+          </div>
+          <div>
+            <label for="billingDocumentNumber" class="block text-sm font-medium text-slate-700 mb-1">เลขที่เอกสาร</label>
+            <input
+              id="billingDocumentNumber"
+              type="text"
+              placeholder="ว่าง = สร้างอัตโนมัติ"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="sm:col-span-2 mb-3">
+            <label for="billingCompanyLookup" class="block text-xs text-gray-500 mb-1">ดึงข้อมูลจากบริษัท/ลูกค้าเดิม</label>
+            <div class="flex items-center gap-2">
+              <select
+                id="billingCompanyLookup"
+                onchange="handleCompanyLookupChange()"
+                class="flex-1 min-w-0 px-3 py-2 border rounded text-sm bg-gray-50 focus:ring-1 focus:ring-blue-500 outline-none"
+              >
+                <option value="">-- กรอกข้อมูลใหม่ / เลือกบริษัทเดิม --</option>
+              </select>
+              <button
+                type="button"
+                onclick="openCompanyManager()"
+                class="shrink-0 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm transition-colors whitespace-nowrap"
+              >
+                จัดการบริษัท
+              </button>
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="billingBilledToTaxId" class="block text-sm font-medium text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี</label>
+            <input
+              id="billingBilledToTaxId"
+              type="text"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="billingBilledToName" class="block text-sm font-medium text-slate-700 mb-1">บริษัท</label>
+            <input
+              id="billingBilledToName"
+              type="text"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="billingBilledToAddress" class="block text-sm font-medium text-slate-700 mb-1">ที่อยู่</label>
+            <textarea
+              id="billingBilledToAddress"
+              rows="2"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-slate-800 mb-2">รายการสินค้า </h4>
+          <div class="border border-slate-200 rounded-lg overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">รายการสินค้า</th>
+                  <th class="px-3 py-2 text-right font-semibold text-slate-600 w-24">จำนวน</th>
+                  <th class="px-3 py-2 text-right font-semibold text-slate-600 w-32">ราคา/หน่วย</th>
+                  <th class="px-3 py-2 text-right font-semibold text-slate-600 w-32">ราคารวม</th>
+                  <th id="billingActionTh" class="billing-items-action-col px-3 py-2 w-12"></th>
+                </tr>
+              </thead>
+              <tbody id="billingItemsBody" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+          </div>
+          <button
+            type="button"
+            id="addBillingRowBtn"
+            class="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            + เพิ่มรายการสินค้า
+          </button>
+        </div>
+
+        <div class="flex justify-end mb-6">
+          <div class="w-full max-w-xs space-y-2 text-sm">
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-600">ยอดรวม (Subtotal)</span>
+              <span id="billingSubtotal" class="font-medium text-slate-800">0.00</span>
+            </div>
+            <div class="flex justify-between items-center gap-4">
+              <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
+                <input type="checkbox" id="billingVatEnabled" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                ภาษีมูลค่าเพิ่ม 7%
+              </label>
+              <span id="billingVatAmount" class="font-medium text-slate-800">0.00</span>
+            </div>
+            <div class="flex justify-between gap-4 pt-2 border-t border-slate-200 text-base">
+              <span class="font-semibold text-slate-800">ยอดสุทธิ</span>
+              <span id="billingGrandTotal" class="font-bold text-slate-900">0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2 border-t border-slate-200">
+          <button
+            type="button"
+            id="cancelBillingBtn"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+          >
+            ปิด
+          </button>
+          <button
+            type="submit"
+            id="saveBillingBtn"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="companyManagerModal" class="hidden fixed inset-0 bg-gray-600/50 flex items-center justify-center z-[60] p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <h3 class="text-xl font-semibold text-slate-800">จัดการบริษัท / ลูกค้า</h3>
+        <button
+          type="button"
+          onclick="closeCompanyManager()"
+          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          aria-label="ปิด"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-sm font-semibold text-slate-800 mb-3">เพิ่ม / แก้ไขบริษัท</h4>
+            <form id="companyManagerForm" class="space-y-3">
+              <input type="hidden" id="companyManagerId" value="" />
+              <div>
+                <label for="companyManagerName" class="block text-xs text-gray-500 mb-1">ชื่อบริษัท/ลูกค้า</label>
+                <input
+                  id="companyManagerName"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label for="companyManagerAddress" class="block text-xs text-gray-500 mb-1">ที่อยู่</label>
+                <textarea
+                  id="companyManagerAddress"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+                ></textarea>
+              </div>
+              <div>
+                <label for="companyManagerTaxId" class="block text-xs text-gray-500 mb-1">เลขผู้เสียภาษี</label>
+                <input
+                  id="companyManagerTaxId"
+                  type="text"
+                  class="w-full px-3 py-2 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div class="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  id="companyManagerSaveBtn"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                >
+                  บันทึก
+                </button>
+                <button
+                  type="button"
+                  id="companyManagerClearBtn"
+                  onclick="resetCompanyManagerForm()"
+                  class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                >
+                  ล้างฟอร์ม
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-semibold text-slate-800 mb-3">รายการบริษัทที่บันทึกไว้</h4>
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="px-4 py-2 font-semibold text-slate-600">ชื่อบริษัท</th>
+                    <th class="px-4 py-2 font-semibold text-slate-600 text-right w-28">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="companyManagerTableBody" class="divide-y divide-slate-100">
+                  <tr>
+                    <td colspan="2" class="px-4 py-6 text-center text-slate-500">ยังไม่มีบริษัท</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-200 flex justify-end shrink-0">
+        <button
+          type="button"
+          onclick="closeCompanyManager()"
+          class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+        >
+          ปิด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="printContainer" class="hidden print:block w-full bg-white text-black text-sm"></div>
+  <script src="utils.js"></script>
+  <script src="billing.js"></script>
+</body>
+</html>
