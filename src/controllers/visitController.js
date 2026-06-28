@@ -1,4 +1,5 @@
 const db = require('../database/db');
+const { triggerBackup } = require('../services/backupService');
 
 const VISIT_BODY_COLUMNS = [
   'visit_date',
@@ -110,6 +111,9 @@ function createVisit(req, res) {
       db.run(sql, values, function onInsert(err) {
         if (err) return res.status(500).json({ error: err.message });
 
+        triggerBackup();
+        console.log("DEBUG: Backup triggered manually after save");
+
         db.get('SELECT * FROM visits WHERE id = ?', [this.lastID], (fetchErr, visit) => {
           if (fetchErr) return res.status(500).json({ error: fetchErr.message });
           res.status(201).json(visit);
@@ -142,6 +146,9 @@ function updateVisit(req, res) {
   db.run(sql, values, function onUpdate(err) {
     if (err) return res.status(500).json({ error: err.message });
     if (this.changes === 0) return res.status(404).json({ error: 'Visit not found' });
+
+    triggerBackup();
+    console.log("DEBUG: Backup triggered manually after save");
 
     db.get('SELECT * FROM visits WHERE id = ?', [visitId], (fetchErr, visit) => {
       if (fetchErr) return res.status(500).json({ error: fetchErr.message });

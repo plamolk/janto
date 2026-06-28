@@ -3,5 +3,5 @@ database.sqlite
 database.sqlite-wal
 database.sqlite-shm
 public/style/output.css
-config/config/credentials.json 
+config/credentials.json 
 config/token.json 

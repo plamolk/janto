@@ -17,11 +17,11 @@ const CREDENTIALS_PATH = path.resolve(__dirname, '../../config/credentials.json'
 const TOKEN_PATH = path.resolve(__dirname, '../../config/token.json');
 
 // TODO: Set your Google Drive Folder ID here after creating the target folder
-const DRIVE_FOLDER_ID = '18jS4ljnM2EgB5z0wCI8tRzANHPHlIu8j';
+const DRIVE_FOLDER_ID = '1kcOdygmTVvUZHATwS7AK0E-5uA9RV_YL';
 
 // ─── Debounce State ─────────────────────────────────────────────────────────
 let debounceTimer = null;
-const DEBOUNCE_MS = 15_000; // 15 seconds (Rule #1)
+const DEBOUNCE_MS = 10_000; // 10 seconds (Rule #1)
 
 // ─── Midnight Janitor State ─────────────────────────────────────────────────
 const DAY_MS = 24 * 60 * 60 * 1000; // 86 400 000 ms
@@ -94,9 +94,11 @@ function compressDatabase() {
 // ═══════════════════════════════════════════════════════════════════════════
 function uploadToDrive() {
   return new Promise((resolve, reject) => {
+    console.log("--- Backup Attempt Started ---");
+
     // ── Guard: skip upload if credentials aren't configured yet ──────────
     if (!fs.existsSync(CREDENTIALS_PATH)) {
-      console.warn('⚠️ config/credentials.json not found — skipping Drive upload');
+      console.log("--- Backup Skipped: config/credentials.json not found ---");
       return resolve();
     }
 
@@ -104,14 +106,14 @@ function uploadToDrive() {
     try {
       credentialsRaw = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, 'utf-8'));
     } catch (parseErr) {
-      console.warn('⚠️ credentials.json is empty or invalid — skipping Drive upload');
+      console.log("--- Backup Skipped: credentials.json is empty or invalid ---");
       return resolve();
     }
 
     // If credentials.json is an empty object {}, skip gracefully
     const credKeys = credentialsRaw.installed || credentialsRaw.web;
     if (!credKeys) {
-      console.warn('⚠️ credentials.json has no "installed" or "web" key — skipping Drive upload');
+      console.log("--- Backup Skipped: credentials.json has no 'installed' or 'web' key ---");
       return resolve();
     }
 
@@ -124,7 +126,7 @@ function uploadToDrive() {
 
     // ── Load saved token ────────────────────────────────────────────────
     if (!fs.existsSync(TOKEN_PATH)) {
-      console.warn('⚠️ config/token.json not found — skipping Drive upload');
+      console.log("--- Backup Skipped: config/token.json not found ---");
       return resolve();
     }
 
@@ -132,16 +134,17 @@ function uploadToDrive() {
     try {
       tokenRaw = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf-8'));
     } catch (parseErr) {
-      console.warn('⚠️ token.json is empty or invalid — skipping Drive upload');
+      console.log("--- Backup Skipped: token.json is empty or invalid ---");
       return resolve();
     }
 
     if (!tokenRaw.access_token) {
-      console.warn('⚠️ token.json has no access_token — skipping Drive upload');
+      console.log("--- Backup Skipped: token.json has no access_token ---");
       return resolve();
     }
 
     oAuth2Client.setCredentials(tokenRaw);
+    console.log("Network: OK, Auth: OK");
 
     const drive = google.drive({ version: 'v3', auth: oAuth2Client });
 
@@ -186,6 +189,7 @@ function uploadToDrive() {
               const { id, name, size } = response.data;
               const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
               console.log(`☁️  Updated in Google Drive: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              console.log("--- Backup Successful! ---");
               resolve(response.data);
             }
           );
@@ -204,6 +208,7 @@ function uploadToDrive() {
               const { id, name, size } = response.data;
               const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
               console.log(`☁️  Uploaded to Google Drive: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              console.log("--- Backup Successful! ---");
               resolve(response.data);
             }
           );
@@ -247,7 +252,7 @@ function triggerBackup() {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`🟢 Backup complete in ${elapsed}s`);
     } catch (err) {
-      console.error('🔴 Backup FAILED:', err.message);
+      console.error('--- Backup FAILED: ', err);
       // Error is caught and logged — server keeps running
     }
   }, DEBOUNCE_MS);

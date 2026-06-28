@@ -12,6 +12,43 @@ function parseEditableValue(text) {
   return t === '—' ? '' : t;
 }
 
+function parseThaiDateInput(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    const beYear = parseInt(parts[2], 10);
+    const adYear = beYear - 543;
+    return `${adYear}-${month}-${day}`;
+  }
+  return dateStr;
+}
+
+function formatDateToThaiBE(d) {
+  if (!d) return '';
+  if (typeof d === 'string') d = new Date(d);
+  if (isNaN(d.getTime())) return '';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const beYear = d.getFullYear() + 543;
+  return `${day}/${month}/${beYear}`;
+}
+
+function mapPrescriptionType(val) {
+  if (!val) return '';
+  const v = String(val).trim();
+  switch (v) {
+    case 'Distance': return 'แว่นระยะไกล';
+    case 'สายตาไกล': return 'แว่นระยะไกล';
+    case 'Reading': return 'แว่นระยะใกล้';
+    case 'Progressive': return 'เลนส์โปรเกรสซิพ';
+    case 'Bifocal': return 'แว่นระยะกลาง';
+    case 'Other': return ''; 
+    default: return v;
+  }
+}
+
 let customersData = [];
 let currentViewCustomerId = null;
 let currentCustomerVisits = [];
@@ -59,8 +96,9 @@ function populateCustomerDetailFields(customer) {
   document.getElementById('detailFirstName').textContent = c.first_name || '—';
   document.getElementById('detailLastName').textContent = c.last_name || '—';
   document.getElementById('detailPhone').textContent = c.tel_mobile || '—';
-  document.getElementById('detailBirthdate').textContent = c.birthdate ? formatDate(c.birthdate) : '—';
-  document.getElementById('detailCreatedAt').textContent = c.created_at ? formatDate(c.created_at) : '—';
+  document.getElementById('detailBirthdate').textContent = c.birthdate ? new Date(c.birthdate).toLocaleDateString('th-TH') : '—';
+  document.getElementById('detailAge').textContent = displayCustomerValue(customer.age);
+  document.getElementById('detailCreatedAt').textContent = c.created_at ? new Date(c.created_at).toLocaleDateString('th-TH') : '—';
   document.getElementById('detailGender').textContent = displayCustomerValue(customer.gender);
   document.getElementById('detailOccupation').textContent = displayCustomerValue(customer.occupation);
   document.getElementById('detailEmail').textContent = displayCustomerValue(customer.email);
@@ -75,6 +113,10 @@ function populateCustomerDetailFields(customer) {
 
 async function updateCustomerField(customerId, field, newValue, extraFields = {}) {
   const payload = { [field]: newValue, ...extraFields };
+  
+  if (field === 'age' || payload.age !== undefined) {
+    console.log('[DEBUG] Submitting Edit Payload:', payload);
+  }
 
   if (field === 'first_name' && !String(newValue).trim()) {
     alert('ชื่อจำเป็นต้องไม่ว่าง');
@@ -265,6 +307,11 @@ async function commitInlineEdit(el, customerId, field, originalText) {
   el.dataset.committing = 'true';
   control.disabled = true;
 
+  let parsedValue = newValue;
+  if (field === 'birthdate' || field === 'created_at' || field === 'visit_date') {
+    parsedValue = parseThaiDateInput(newValue);
+  }
+
   const extraFields = {};
   if (field === 'glasses_experience') {
     if (newValue === 'ยังไม่เคยใส่แว่น') {
@@ -274,7 +321,7 @@ async function commitInlineEdit(el, customerId, field, originalText) {
     }
   }
 
-  const ok = await updateCustomerField(customerId, field, newValue, extraFields);
+  const ok = await updateCustomerField(customerId, field, parsedValue, extraFields);
   delete el.dataset.committing;
 
   if (ok) {
@@ -302,10 +349,15 @@ function startInlineEdit(el, customerId) {
   if (el.querySelector('input, select')) return;
 
   const field = el.dataset.field;
+  const originalText = el.textContent.trim();
+
+  if (field === 'age') {
+    console.log('[DEBUG] Double-click Edit. Populating Age:', originalText);
+  }
+
   if (!field) return;
 
   const type = el.dataset.type || 'text';
-  const originalText = el.textContent;
   const currentValue = parseEditableValue(originalText);
 
   beginInlineEditSlot(el);
@@ -348,9 +400,13 @@ function startInlineEdit(el, customerId) {
     return;
   }
 
-  const inputType = field === 'birthdate' ? 'date' : 'text';
+  const inputType = 'text';
   const input = document.createElement('input');
   input.type = inputType;
+  if (field === 'birthdate' || field === 'created_at' || field === 'visit_date') {
+    input.placeholder = 'วว/ดด/ปปปป';
+    input.classList.add('thai-date-input');
+  }
   input.value = currentValue;
   input.className = INLINE_EDIT_INNER_CLASS;
   el.appendChild(input);
@@ -396,8 +452,7 @@ function openModal() {
   const form = document.getElementById('customerForm');
   form.reset();
   const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById('customer-date').value = now.toISOString().slice(0, 10);
+  document.getElementById('customer-date').value = formatDateToThaiBE(now);
   document.getElementById('customerModal').classList.remove('hidden');
 }
 
@@ -550,11 +605,6 @@ async function refreshCustomerVisits() {
   renderVisitTable(visits);
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('th-TH');
-}
-
 function renderVisitTable(visits) {
   const tbody = document.getElementById('visitTableBody');
   if (!visits.length) {
@@ -568,8 +618,8 @@ function renderVisitTable(visits) {
       (v) => `
     <tr class="hover:bg-slate-50">
       <td class="px-4 py-3">${escapeHtml(v.visit_number ?? '—')}</td>
-      <td class="px-4 py-3">${escapeHtml(formatDate(v.visit_date))}</td>
-      <td class="px-4 py-3">${escapeHtml(v.prescription_type || '—')}</td>
+      <td class="px-4 py-3">${escapeHtml(v.visit_date ? new Date(v.visit_date).toLocaleDateString('th-TH') : '—')}</td>
+      <td class="px-4 py-3">${escapeHtml(mapPrescriptionType(v.prescription_type) || '—')}</td>
       <td class="px-4 py-3">${escapeHtml(v.examiner || '—')}</td>
       <td class="px-4 py-3">${escapeHtml(v.salesperson || '—')}</td>
       <td class="px-4 py-3 text-right">
@@ -617,7 +667,9 @@ function populateVisitForm(visit) {
     const el = form.elements[field];
     if (!el) return;
     if (field === 'visit_date' && visit[field]) {
-      el.value = String(visit[field]).substring(0, 10);
+      el.value = formatDateToThaiBE(visit[field]);
+    } else if (field === 'prescription_type' && visit[field]) {
+      el.value = mapPrescriptionType(visit[field]);
     } else {
       el.value = visit[field] ?? '';
     }
@@ -696,8 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('visitId').value = '';
     document.getElementById('visitModalTitle').textContent = '+ เพิ่มประวัติใหม่';
     const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('visit-date').value = now.toISOString().slice(0, 10);
+    document.getElementById('visit-date').value = formatDateToThaiBE(now);
     setVisitFormMode(false);
     document.getElementById('visitModal').classList.remove('hidden');
   });
@@ -714,6 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const payload = Object.fromEntries(new FormData(e.target).entries());
+      if (payload.visit_date) payload.visit_date = parseThaiDateInput(payload.visit_date);
       const visitId = payload.visitId;
       delete payload.visitId;
 
@@ -742,12 +794,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         const err = await response.json();
         alert(err.error || 'ไม่สามารถบันทึกประวัติได้');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
       }
     } catch (err) {
       alert('เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง');
       console.error(err);
+    } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -789,6 +840,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const formData = new FormData(e.target);
       const payload = Object.fromEntries(formData.entries());
+      
+      if (payload.created_at) payload.created_at = parseThaiDateInput(payload.created_at);
+      if (payload.birthdate) payload.birthdate = parseThaiDateInput(payload.birthdate);
 
       // Resolve purpose_other override
       if (payload.purpose === 'อื่นๆ' && payload.purpose_other) {
@@ -827,12 +881,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         const err = await response.json();
         alert(err.error || 'ไม่สามารถบันทึกข้อมูลลูกค้าได้');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
       }
     } catch (err) {
       alert('เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง');
       console.error(err);
+    } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }

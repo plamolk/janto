@@ -116,8 +116,8 @@
         <!-- Row 0: วันที่บันทึก -->
         <div class="col-span-2">
           <label for="customer-date" class="block text-base font-medium text-gray-700 mb-1">วันที่บันทึก/วันที่สมัคร <span class="text-red-500">*</span></label>
-          <input id="customer-date" name="created_at" type="date" required
-            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input id="customer-date" name="created_at" type="text" placeholder="วว/ดด/ปปปป" required
+            class="thai-date-input w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
 
         <!-- Row 1: ชื่อ / นามสกุล -->
@@ -133,15 +133,22 @@
         </div>
 
         <!-- Row 2: เบอร์มือถือ / วันเกิด -->
-        <div>
+        <div class="col-span-2 sm:col-span-1">
           <label for="tel_mobile" class="block text-base font-medium text-gray-700 mb-1">เบอร์มือถือ</label>
           <input id="tel_mobile" name="tel_mobile" type="text"
             class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <div>
-          <label for="birthdate" class="block text-base font-medium text-gray-700 mb-1">วันเกิด</label>
-          <input id="birthdate" name="birthdate" type="date"
-            class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="col-span-2 sm:col-span-1 grid grid-cols-2 gap-4">
+          <div>
+            <label for="birthdate" class="block text-base font-medium text-gray-700 mb-1">วันเกิด</label>
+            <input id="birthdate" name="birthdate" type="text" placeholder="วว/ดด/ปปปป"
+              class="thai-date-input w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="age" class="block text-base font-medium text-gray-700 mb-1">อายุ</label>
+            <input id="age" name="age" type="text"
+              class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
         </div>
 
         <!-- Row 3: เพศ / อาชีพ -->
@@ -344,9 +351,15 @@
             <label class="text-base font-medium text-gray-700 mb-1">เบอร์มือถือ</label>
             <span id="detailPhone" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="tel_mobile">—</span>
           </div>
-          <div class="flex flex-col min-w-0">
-            <label class="text-base font-medium text-gray-700 mb-1">วันเกิด</label>
-            <span id="detailBirthdate" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="birthdate">—</span>
+          <div class="grid grid-cols-2 gap-4 min-w-0">
+            <div class="flex flex-col min-w-0">
+              <label class="text-base font-medium text-gray-700 mb-1">วันเกิด</label>
+              <span id="detailBirthdate" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="birthdate">—</span>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <label class="text-base font-medium text-gray-700 mb-1">อายุ</label>
+              <span id="detailAge" class="editable-field block w-full min-h-[36px] px-2 py-1.5 text-base bg-gray-50 border border-transparent rounded hover:border-gray-300 hover:bg-gray-100 cursor-text truncate transition-colors" data-field="age">—</span>
+            </div>
           </div>
           <div class="flex flex-col min-w-0">
             <label class="text-base font-medium text-gray-700 mb-1">เพศ</label>
@@ -487,7 +500,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label for="visit-date" class="block text-base font-medium text-gray-700 mb-1">วันที่เข้ารับบริการ</label>
-            <input id="visit-date" name="visit_date" type="date" required class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input id="visit-date" name="visit_date" type="text" placeholder="วว/ดด/ปปปป" required class="thai-date-input w-full px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label for="examiner" class="block text-base font-medium text-gray-700 mb-1">ผู้ตรวจสายตา</label>
@@ -607,11 +620,12 @@
             <label for="prescription_type" class="block text-base font-medium text-gray-700 mb-1">ประเภทการมอง</label>
             <select id="prescription_type" name="prescription_type" class="w-full max-w-md px-3 py-2.5 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">— เลือก —</option>
-              <option value="Distance">สายตาไกล</option>
-              <option value="Reading">สายตาอ่านหนังสือ</option>
-              <option value="Progressive">เลนส์โปรเกรสซีฟ</option>
-              <option value="Bifocal">สองชั้น</option>
-              <option value="Other">อื่นๆ</option>
+              <option value="แว่นระยะไกล">แว่นระยะไกล</option>
+              <option value="แว่นระยะใกล้">แว่นระยะใกล้</option>
+              <option value="แว่นระยะกลาง">แว่นระยะกลาง</option>
+              <option value="เลนส์โปรเกรสซิพ">เลนส์โปรเกรสซิพ</option>
+              <option value="แว่นสองชั้น">แว่นสองชั้น</option>
+              <option value="คอนแทคเลนส์">คอนแทคเลนส์</option>
             </select>
           </div>
 

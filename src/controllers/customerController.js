@@ -1,11 +1,13 @@
 const db = require('../database/db');
 const { toJsonString } = require('../utils');
+const { triggerBackup } = require('../services/backupService');
 
 const CUSTOMER_COLUMNS = [
   'member_id',
   'first_name',
   'last_name',
   'gender',
+  'age',
   'birthdate',
   'occupation',
   'address',
@@ -29,6 +31,7 @@ function mapCustomerBody(body) {
     first_name: body.first_name ?? null,
     last_name: body.last_name ?? null,
     gender: body.gender ?? null,
+    age: body.age ?? null,
     birthdate: body.birthdate ?? null,
     occupation: body.occupation ?? null,
     address: body.address ?? null,
@@ -80,6 +83,9 @@ function createCustomer(req, res) {
   db.run(sql, customerValues(data), function onInsert(err) {
     if (err) return res.status(500).json({ error: err.message });
 
+    triggerBackup();
+    console.log("DEBUG: Backup triggered manually after save");
+
     db.get('SELECT * FROM customers WHERE id = ?', [this.lastID], (fetchErr, row) => {
       if (fetchErr) return res.status(500).json({ error: fetchErr.message });
       res.status(201).json(row);
@@ -94,6 +100,7 @@ function updateCustomer(req, res) {
     if (findErr) return res.status(500).json({ error: findErr.message });
     if (!existing) return res.status(404).json({ error: 'Customer not found' });
 
+    console.log('[DEBUG] Backend Received Update Body:', req.body);
     const merged = { ...existing, ...req.body };
     if (!merged.first_name || String(merged.first_name).trim() === '') {
       return res.status(400).json({ error: 'ข้อมูลไม่ถูกต้อง / Invalid data' });
@@ -102,9 +109,14 @@ function updateCustomer(req, res) {
     const data = mapCustomerBody(merged);
     const setClause = CUSTOMER_COLUMNS.map((col) => `${col} = ?`).join(', ');
     const sql = `UPDATE customers SET ${setClause} WHERE id = ?`;
+    console.log('[DEBUG] Backend SQL Executing:', sql);
+    console.log('[BACKEND] Updating Customer ID:', id, '| Age received:', data.age);
 
     db.run(sql, [...customerValues(data), id], function onUpdate(err) {
       if (err) return res.status(500).json({ error: err.message });
+
+      triggerBackup();
+      console.log("DEBUG: Backup triggered manually after save");
 
       db.get('SELECT * FROM customers WHERE id = ?', [id], (fetchErr, row) => {
         if (fetchErr) return res.status(500).json({ error: fetchErr.message });

@@ -10,11 +10,6 @@ function formatDocumentType(type) {
     : 'ใบเสนอราคา / QUOTATION';
 }
 
-function formatBillingDate(dateStr) {
-  if (!dateStr) return '—';
-  return String(dateStr).slice(0, 10);
-}
-
 function parseBillingItems(itemsJson) {
   if (!itemsJson) return [];
   try {
@@ -347,7 +342,7 @@ function renderBillingTable(docs) {
       <td class="px-6 py-3 text-slate-600">${escapeHtml(formatDocumentType(doc.document_type))}</td>
       <td class="px-6 py-3 text-slate-600">${escapeHtml(doc.billed_to_name || '—')}</td>
       <td class="px-6 py-3 text-slate-800 text-right">${formatMoney(doc.grand_total)}</td>
-      <td class="px-6 py-3 text-slate-600">${formatBillingDate(doc.created_at)}</td>
+      <td class="px-6 py-3 text-slate-600">${doc.created_at ? new Date(doc.created_at).toLocaleDateString('th-TH') : '—'}</td>
       <td class="px-6 py-3 text-right whitespace-nowrap">
         <button
           type="button"
@@ -693,13 +688,6 @@ const SHOP_PRINT = {
   remarks: '(ธนาคารกสิกรไทย 125-867-3111 นางสาวอัมพา จันทร์โต)',
 };
 
-function formatPrintDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return formatBillingDate(dateStr);
-  return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
 function isTaxInvoice(doc) {
   return Number(doc.document_type) === 2;
 }
@@ -776,7 +764,7 @@ function buildPrintSignatureBlock(doc) {
 
 function buildBillingPrintHtml(doc) {
   const items = parseBillingItems(doc.items_json);
-  const dateLabel = formatPrintDate(doc.created_at);
+  const dateLabel = doc.created_at ? new Date(doc.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
   const docTypeLabel = getPrintTitle(doc);
   const taxInvoice = isTaxInvoice(doc);
   const vatAmount = Number(doc.vat_amount) || 0;

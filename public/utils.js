@@ -10,6 +10,7 @@ function formatMoney(amount) {
   return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Mission B — System Health Monitor & Read-Only Mode
 // ═══════════════════════════════════════════════════════════════════════════

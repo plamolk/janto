@@ -36,6 +36,7 @@ function initDb() {
         first_name TEXT NOT NULL,
         last_name TEXT,
         gender TEXT,
+        age TEXT,
         birthdate TEXT,
         occupation TEXT,
         address TEXT,
@@ -58,6 +59,13 @@ function initDb() {
           process.exit(1);
         }
         console.log('Table ready: customers');
+
+        // Add age column migration
+        db.run(`ALTER TABLE customers ADD COLUMN age TEXT`, (alterErr) => {
+          if (alterErr && !alterErr.message.includes('duplicate column')) {
+            console.error(`Migration warning (customers.age):`, alterErr.message);
+          }
+        });
       }
     );
 
