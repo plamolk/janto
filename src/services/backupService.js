@@ -145,8 +145,7 @@ function uploadToDrive() {
 
     const drive = google.drive({ version: 'v3', auth: oAuth2Client });
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = `janto_backup_${timestamp}.zip`;
+    const fileName = 'backup_today.zip';
 
     const fileMetadata = {
       name: fileName,
@@ -158,21 +157,57 @@ function uploadToDrive() {
       body: fs.createReadStream(BACKUP_ZIP_PATH),
     };
 
-    drive.files.create(
+    const query = `name='${fileName}' and trashed=false${DRIVE_FOLDER_ID ? ` and '${DRIVE_FOLDER_ID}' in parents` : ''}`;
+
+    drive.files.list(
       {
-        resource: fileMetadata,
-        media: media,
-        fields: 'id, name, size',
+        q: query,
+        fields: 'files(id, name)',
+        spaces: 'drive',
       },
-      (err, response) => {
-        if (err) {
-          return reject(new Error(`Drive upload failed: ${err.message}`));
+      (listErr, listRes) => {
+        if (listErr) {
+          return reject(new Error(`Drive list failed: ${listErr.message}`));
         }
 
-        const { id, name, size } = response.data;
-        const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
-        console.log(`☁️  Uploaded to Google Drive: ${name} (${sizeMB} MB) [ID: ${id}]`);
-        resolve(response.data);
+        const existingFile = listRes.data.files && listRes.data.files.length > 0 ? listRes.data.files[0] : null;
+
+        if (existingFile) {
+          drive.files.update(
+            {
+              fileId: existingFile.id,
+              media: media,
+              fields: 'id, name, size',
+            },
+            (err, response) => {
+              if (err) {
+                return reject(new Error(`Drive update failed: ${err.message}`));
+              }
+              const { id, name, size } = response.data;
+              const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
+              console.log(`☁️  Updated in Google Drive: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              resolve(response.data);
+            }
+          );
+        } else {
+          drive.files.create(
+            {
+              resource: fileMetadata,
+              media: media,
+              fields: 'id, name, size',
+            },
+            (err, response) => {
+              if (err) {
+                return reject(new Error(`Drive upload failed: ${err.message}`));
+              }
+
+              const { id, name, size } = response.data;
+              const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
+              console.log(`☁️  Uploaded to Google Drive: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              resolve(response.data);
+            }
+          );
+        }
       }
     );
   });
@@ -310,14 +345,48 @@ function uploadDatedToDrive(fileName, filePath) {
       body: fs.createReadStream(filePath),
     };
 
-    drive.files.create(
-      { resource: fileMetadata, media, fields: 'id, name, size' },
-      (err, response) => {
-        if (err) return reject(new Error(`Dated Drive upload failed: ${err.message}`));
-        const { id, name, size } = response.data;
-        const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
-        console.log(`☁️  Daily snapshot uploaded: ${name} (${sizeMB} MB) [ID: ${id}]`);
-        resolve(response.data);
+    const query = `name='${fileName}' and trashed=false${DRIVE_FOLDER_ID ? ` and '${DRIVE_FOLDER_ID}' in parents` : ''}`;
+
+    drive.files.list(
+      {
+        q: query,
+        fields: 'files(id, name)',
+        spaces: 'drive',
+      },
+      (listErr, listRes) => {
+        if (listErr) {
+          return reject(new Error(`Dated Drive list failed: ${listErr.message}`));
+        }
+
+        const existingFile = listRes.data.files && listRes.data.files.length > 0 ? listRes.data.files[0] : null;
+
+        if (existingFile) {
+          drive.files.update(
+            {
+              fileId: existingFile.id,
+              media: media,
+              fields: 'id, name, size',
+            },
+            (err, response) => {
+              if (err) return reject(new Error(`Dated Drive update failed: ${err.message}`));
+              const { id, name, size } = response.data;
+              const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
+              console.log(`☁️  Daily snapshot updated: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              resolve(response.data);
+            }
+          );
+        } else {
+          drive.files.create(
+            { resource: fileMetadata, media, fields: 'id, name, size' },
+            (err, response) => {
+              if (err) return reject(new Error(`Dated Drive upload failed: ${err.message}`));
+              const { id, name, size } = response.data;
+              const sizeMB = (parseInt(size, 10) / (1024 * 1024)).toFixed(2);
+              console.log(`☁️  Daily snapshot uploaded: ${name} (${sizeMB} MB) [ID: ${id}]`);
+              resolve(response.data);
+            }
+          );
+        }
       }
     );
   });
